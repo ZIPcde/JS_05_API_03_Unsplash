@@ -27,7 +27,7 @@ async function showPic() {
     }
     if (!viewedPhotos[photoIndex].likedByYou) {
       viewedPhotos[photoIndex].likedByYou = true;
-      data.likes++; // Увеличиваем количество лайков для текущего изображения
+      data.likes++;
       likes.textContent = `Количество лайков, которое набрало данное изображение: ${data.likes}`;
       totalLikes++;
       localStorage.setItem('totalLikes', totalLikes);
@@ -42,9 +42,9 @@ async function showPic() {
     if (likedPhotosToggle.checked) {
       const likedPhotos = viewedPhotos.filter(photo => photo.likedByYou);
       console.log(likedPhotos);
-      // Добавьте здесь логику для отображения только пролайканных фото
+      // Если доживу, поместить сюда фильтр только лайканых фото
     } else {
-      // Добавьте здесь логику для отображения всех просмотренных фото
+      // Если доживу, поместить сюда сброс фильтра нелайканых фото
     }
   });
   const totalLikesElement = document.createElement('p');
@@ -62,7 +62,7 @@ async function showPic() {
   photoContainer.appendChild(likedPhotosToggle);
   photoContainer.appendChild(likedPhotosLabel);
 
-  // Отображение ранее просмотренных фото
+  // Отображение ранее просмотренных фоток, не больше 10 штучек
   const recentPhotos = viewedPhotos.slice(-10).reverse();
   for (const photo of recentPhotos) {
     const photoUrl = `https://api.unsplash.com/photos/${photo.id}?client_id=9GwifaxmL5TVyzZSy8bd6maQ4anLSt9KIgjLoqLBpt4`;
