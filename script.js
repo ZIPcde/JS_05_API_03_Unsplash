@@ -31,6 +31,8 @@ async function showPic() {
     const likedPhotos = viewedPhotos.filter(photoId => viewedPhotos.includes(photoId));
     console.log(likedPhotos);
   });
+  const totalLikesElement = document.createElement('p'); // Изменили имя переменной
+  totalLikesElement.textContent = `Общее количество лайков: ${localStorage.getItem('totalLikes')}`; // Изменили имя переменной
   const likedPhotosLabel = document.createElement('label');
   likedPhotosLabel.for = 'likedPhotosToggle';
   likedPhotosLabel.textContent = 'Показать только пролайканые фото';
@@ -40,8 +42,27 @@ async function showPic() {
   photoContainer.appendChild(authorInfo);
   photoContainer.appendChild(likes);
   photoContainer.appendChild(likeButton);
+  photoContainer.appendChild(totalLikesElement); // Изменили имя переменной
   photoContainer.appendChild(likedPhotosToggle);
   photoContainer.appendChild(likedPhotosLabel);
+
+  // Отображение 10 ранее просмотренных фоток
+  const recentPhotos = viewedPhotos.slice(-10).reverse();
+  for (const photoId of recentPhotos) {
+    const photoUrl = `https://api.unsplash.com/photos/${photoId}?client_id=9GwifaxmL5TVyzZSy8bd6maQ4anLSt9KIgjLoqLBpt4`;
+    const photoResponse = await fetch(photoUrl);
+    const photoData = await photoResponse.json();
+    const recentPhoto = document.createElement('div');
+    recentPhoto.classList.add('recent-photo-container');
+    const recentPhotoImage = document.createElement('img');
+    recentPhotoImage.src = photoData.urls.regular;
+    recentPhotoImage.classList.add('recent-photo');
+    const recentPhotoInfo = document.createElement('p');
+    recentPhotoInfo.textContent = `Вы ${viewedPhotos.includes(photoData.id) ? 'лайкали' : 'не лайкали'} это фото`;
+    recentPhoto.appendChild(recentPhotoImage);
+    recentPhoto.appendChild(recentPhotoInfo);
+    photoContainer.appendChild(recentPhoto);
+  }
 }
 
 document.addEventListener('DOMContentLoaded', showPic);

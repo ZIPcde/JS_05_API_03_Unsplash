@@ -8,3 +8,9 @@
     max-height: 500px;
     height: auto;
 }
+
+.recent-photo {
+    max-width: 300px;
+    max-height: 300px;
+    height: auto;
+}
