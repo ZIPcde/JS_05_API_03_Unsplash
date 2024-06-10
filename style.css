@@ -1,0 +1,10 @@
+#photo-container {
+    max-width: 500px;
+    height: auto;
+}
+
+.random-photo {
+    max-width: 500px;
+    max-height: 500px;
+    height: auto;
+}
