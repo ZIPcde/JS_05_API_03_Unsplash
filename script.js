@@ -1,5 +1,5 @@
 const photoContainer = document.getElementById('photo-container');
-const viewedPhotos = JSON.parse(localStorage.getItem('viewedPhotos')) || [];
+let viewedPhotos = JSON.parse(localStorage.getItem('viewedPhotos')) || [];
 let totalLikes = parseInt(localStorage.getItem('totalLikes')) || 0;
 
 async function showPic() {
@@ -7,6 +7,10 @@ async function showPic() {
   const response = await fetch(url);
   const data = await response.json();
   console.log(data);
+  if (!viewedPhotos.some(photo => photo.id === data.id)) {
+    viewedPhotos.push({ id: data.id, likedByYou: false });
+    localStorage.setItem('viewedPhotos', JSON.stringify(viewedPhotos));
+  };
   const imageUrl = data.urls.regular;
   const image = document.createElement('img');
   const likes = document.createElement('p');
@@ -16,9 +20,16 @@ async function showPic() {
   const likeButton = document.createElement('button');
   likeButton.textContent = 'Поставить лайк';
   likeButton.addEventListener('click', () => {
-    if (!viewedPhotos.includes(data.id)) {
+    const photoIndex = viewedPhotos.findIndex(photo => photo.id === data.id);
+    if (photoIndex === -1) {
+      viewedPhotos.push({ id: data.id, likedByYou: false });
+      localStorage.setItem('viewedPhotos', JSON.stringify(viewedPhotos));
+    }
+    if (!viewedPhotos[photoIndex].likedByYou) {
+      viewedPhotos[photoIndex].likedByYou = true;
+      data.likes++; // Увеличиваем количество лайков для текущего изображения
+      likes.textContent = `Количество лайков, которое набрало данное изображение: ${data.likes}`;
       totalLikes++;
-      viewedPhotos.push(data.id);
       localStorage.setItem('totalLikes', totalLikes);
       localStorage.setItem('viewedPhotos', JSON.stringify(viewedPhotos));
     }
@@ -28,11 +39,16 @@ async function showPic() {
   likedPhotosToggle.type = 'checkbox';
   likedPhotosToggle.id = 'likedPhotosToggle';
   likedPhotosToggle.addEventListener('change', () => {
-    const likedPhotos = viewedPhotos.filter(photoId => viewedPhotos.includes(photoId));
-    console.log(likedPhotos);
+    if (likedPhotosToggle.checked) {
+      const likedPhotos = viewedPhotos.filter(photo => photo.likedByYou);
+      console.log(likedPhotos);
+      // Добавьте здесь логику для отображения только пролайканных фото
+    } else {
+      // Добавьте здесь логику для отображения всех просмотренных фото
+    }
   });
-  const totalLikesElement = document.createElement('p'); // Изменили имя переменной
-  totalLikesElement.textContent = `Общее количество лайков: ${localStorage.getItem('totalLikes')}`; // Изменили имя переменной
+  const totalLikesElement = document.createElement('p');
+  totalLikesElement.textContent = parseInt(localStorage.getItem('totalLikes')) > 0 ? (`Общее количество лайков: ${localStorage.getItem('totalLikes')}`) : 0;
   const likedPhotosLabel = document.createElement('label');
   likedPhotosLabel.for = 'likedPhotosToggle';
   likedPhotosLabel.textContent = 'Показать только пролайканые фото';
@@ -42,14 +58,14 @@ async function showPic() {
   photoContainer.appendChild(authorInfo);
   photoContainer.appendChild(likes);
   photoContainer.appendChild(likeButton);
-  photoContainer.appendChild(totalLikesElement); // Изменили имя переменной
+  photoContainer.appendChild(totalLikesElement);
   photoContainer.appendChild(likedPhotosToggle);
   photoContainer.appendChild(likedPhotosLabel);
 
-  // Отображение 10 ранее просмотренных фоток
+  // Отображение ранее просмотренных фото
   const recentPhotos = viewedPhotos.slice(-10).reverse();
-  for (const photoId of recentPhotos) {
-    const photoUrl = `https://api.unsplash.com/photos/${photoId}?client_id=9GwifaxmL5TVyzZSy8bd6maQ4anLSt9KIgjLoqLBpt4`;
+  for (const photo of recentPhotos) {
+    const photoUrl = `https://api.unsplash.com/photos/${photo.id}?client_id=9GwifaxmL5TVyzZSy8bd6maQ4anLSt9KIgjLoqLBpt4`;
     const photoResponse = await fetch(photoUrl);
     const photoData = await photoResponse.json();
     const recentPhoto = document.createElement('div');
@@ -58,7 +74,7 @@ async function showPic() {
     recentPhotoImage.src = photoData.urls.regular;
     recentPhotoImage.classList.add('recent-photo');
     const recentPhotoInfo = document.createElement('p');
-    recentPhotoInfo.textContent = `Вы ${viewedPhotos.includes(photoData.id) ? 'лайкали' : 'не лайкали'} это фото`;
+    recentPhotoInfo.textContent = `Количество лайков: ${photoData.likes} | Вы ${photo.likedByYou ? 'лайкали' : 'не лайкали'} это фото`;
     recentPhoto.appendChild(recentPhotoImage);
     recentPhoto.appendChild(recentPhotoInfo);
     photoContainer.appendChild(recentPhoto);
